@@ -3,7 +3,7 @@ str2hash
 
 Tiny parser for converting strings to hashes (without using eval).
 
-# Usage 
+## Usage 
 
 str2hash adds String#to_h 
 
@@ -18,15 +18,15 @@ str2hash adds String#to_h
     "{ :foo => :bar, :foo2 => :bar2}".to_h => {:foo=>:bar, :foo2=>:bar2}
     ":foo => :bar, :foo2 => :bar2".to_h => {:foo=>:bar, :foo2=>:bar2}
 
-# Limitations
+## Limitations
 
 No nested hashes, no arrays (yet). No bindings, only values.
 
 
-# Version information
+## Version information
 
 * 0.0.1 - Initial version
 
-# Author
+## Author
 
-karlll <karl@ninjacontrol.com>, 2013
+karlll (karl@ninjacontrol.com), 2013
