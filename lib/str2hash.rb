@@ -5,37 +5,84 @@ require 'parslet'
 
 class HashParse < Parslet::Parser
 
-  rule(:lcbracket) { str('{') >> space? }
-  rule(:rcbracket) { str('}') >> space? }
-  rule(:lbracket) { str('[') >> space? }
-  rule(:rbracket) { str(']') >> space? }
-  rule(:lparen) { str('(') >> space? }
-  rule(:rparen) { str(')') >> space? }
-  rule(:comma) { str(',') >> space? }
-  rule(:larrow) { str('=>') >> space? }
+  rule(:lcbracket) { str('{') >> sp? }
+  rule(:rcbracket) { str('}') >> sp? }
+  rule(:lbracket) { str('[') >> sp? }
+  rule(:rbracket) { str(']') >> sp? }
+  rule(:lparen) { str('(') >> sp? }
+  rule(:rparen) { str(')') >> sp? }
+  rule(:comma) { str(',') >> sp? }
+  rule(:larrow) { str('=>') >> sp? }
 
-  rule(:space) { match('\s').repeat(1) }
-  rule(:space?) { space.maybe }
+  rule(:sp) { match('\s').repeat(1) }
+  rule(:sp?) { sp.maybe }
 
   # values
-  rule(:dec_integer) { match('[0-9]').repeat(1).as(:dec_int) >> space? }
-  rule(:hex_integer) { (str('0x') | str('0X')) >> match['0-9a-fA-F'].repeat(1).as(:hex_int) >> space? }
-  rule(:bin_integer) { (str('0b') | str('0B')) >> (str('1')|str('0')).repeat(1).as(:bin_int) >> space? }
-  rule(:string) { ((str("'") >> match["^'"].repeat(1).as(:str) >> str("'")) |
-      (str('"') >> match['^"'].repeat(1).as(:str) >> str('"'))) >> space? }
-  rule(:pattern) { str("/") >> match['^/'].repeat(1).as(:pattern) >> str("/") >> space? }
-  rule(:symbol) { str(":") >> (match['a-zA-Z_'] >> match['a-zA-Z0-9_'].repeat).as(:symbol) >> space? }
-  rule(:h_symbol) { (match['a-zA-Z_'] >> match['a-zA-Z0-9_'].repeat).as(:symbol) >> str(':') >> space? }
-  rule(:dec_float) { (match['0-9'].repeat(1) >> str('.') >> match['0-9'].repeat(1)).as(:float) >> space? }
-  rule(:boolean) { (str('true') | str('false')).as(:boolean) >> space? }
+  
+  rule(:hex_integer) { 
+    ( str('-').maybe >> (str('0x')|str('0X')) >> match['0-9a-fA-F'].repeat(1) ).as(:hex_int) >> sp? 
+  }
+  
+  rule(:dec_integer) { 
+    ( str('-').maybe >> match['0-9'].repeat(1) ).as(:dec_int) >> sp? 
+  }
+  
+  rule(:bin_integer) { 
+    ( str('-').maybe >> (str('0b') | str('0B')) >> (str('1')|str('0')).repeat(1) ).as(:bin_int) >> sp? 
+  }
+  
+  rule(:dec_float) { 
+    ( str('-').maybe >> match['0-9'].repeat(1) >> str('.') >> match['0-9'].repeat(1) ).as(:dec_f) >> sp? 
+  }
 
-  rule(:value) { dec_integer | hex_integer | bin_integer | string | pattern | symbol | dec_float | boolean }
+  rule(:string) { 
+      ( 
+        (str("'") >> match["^'"].repeat(1).as(:str) >> str("'")) |
+        (str('"') >> match['^"'].repeat(1).as(:str) >> str('"'))
+      ) >> sp?
+  }
+  
+  rule(:pattern) { 
+    str("/") >> match['^/'].repeat(1).as(:pat) >> str("/") >> sp? 
+  }
+  
+  rule(:symbol) { 
+    str(":") >> ( match['a-zA-Z_'] >> match['a-zA-Z0-9_'].repeat ).as(:sym) >> sp? 
+  }
+  rule(:h_symbol) { 
+    ( match['a-zA-Z_'] >> match['a-zA-Z0-9_'].repeat ).as(:sym) >> str(':') >> sp? 
+  }
+  
+  rule(:boolean) { 
+    ( str('true') | str('false') ).as(:boolean) >> sp? 
+  }
+
+  rule(:value) { 
+
+    hex_integer | 
+    dec_float |
+    bin_integer |
+    dec_integer | 
+    string |
+    pattern |
+    symbol |
+    boolean 
+
+  }
 
   # hashes
 
-  rule(:key_value) { ((value.as(:key) >> larrow) | (h_symbol.as(:key))) >> value.as(:value) }
-  rule(:key_value_lst) { key_value >> (comma >> key_value).repeat }
-  rule(:simple_hash) { ((lcbracket >> key_value_lst >> rcbracket) | key_value_lst).as(:hash) }
+  rule(:key_value) { 
+    ( value.as(:key) >> larrow | h_symbol.as(:key) ) >> value.as(:val) 
+  }
+  
+  rule(:key_value_lst) { 
+    key_value >> (comma >> key_value).repeat 
+  }
+  
+  rule(:simple_hash) { 
+    ( lcbracket >> key_value_lst >> rcbracket | key_value_lst ).as(:hash) 
+  }
 
   root :simple_hash
 
@@ -44,12 +91,19 @@ end
 class HashTransform < Parslet::Transform
 
   rule(:dec_int => simple(:i)) { Integer(i) }
+
   rule(:hex_int => simple(:i)) { Integer(i) }
+
   rule(:bin_int => simple(:i)) { Integer(i) }
+
   rule(:str => simple(:s)) { s.to_s }
-  rule(:pattern => simple(:p)) { /#{p}/ }
-  rule(:symbol => simple(:sym)) { sym.to_sym }
-  rule(:dec_float => simple(:f)) { Float(f) }
+
+  rule(:pat => simple(:p)) { /#{p}/ }
+
+  rule(:sym => simple(:symb)) { symb.to_sym }
+
+  rule(:dec_f => simple(:f)) { Float(f) }
+
   rule(:boolean => simple(:b)) {
     case b
       when "true"
@@ -58,9 +112,11 @@ class HashTransform < Parslet::Transform
         false
     end
   }
+
   rule(:hash => subtree(:h)) {
-  (h.is_a?(Array) ? h : [ h ]).inject({}) { |h, e| h[e[:key]] = e[:value] ;h }
+    (h.is_a?(Array) ? h : [ h ]).inject({}) { |h, e| h[e[:key]] = e[:val] ;h }
   }
+
 end
 
 
