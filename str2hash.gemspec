@@ -1,12 +1,29 @@
-Gem::Specification.new do |gem_s|
-  gem_s.name        = 'str2hash'
-  gem_s.version     = '0.0.2'
-  gem_s.date        = '2013-03-29'
-  gem_s.summary     = "Convert string to hash"
-  gem_s.description = "Tiny parser for converting strings to hashes (without using eval)."
-  gem_s.authors     = ["karl l"]
-  gem_s.email       = 'karl@ninjacontrol.com'
-  gem_s.files       = ["lib/str2hash.rb"]
-  gem_s.homepage    =
-    'https://github.com/karlll/str2hash/'
-end
+# coding: utf-8
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'str2hash/version'
+
+Gem::Specification.new do |spec|
+  
+  spec.name          = "str2hash"
+  spec.version       = Str2Hash::VERSION
+  spec.authors       = ["karl l"]
+  spec.email         = ["karl@ninjacontrol.com"]
+  spec.date          = '2013-03-29'
+  spec.summary       = "Convert string to hash"
+  spec.description   = "Tiny parser for converting strings to hashes (without using eval)."
+  spec.homepage      = "https://github.com/karlll/str2hash/"
+  spec.license       = "MIT"
+  
+  spec.files         = `git ls-files`.split($/)
+  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
+  spec.require_paths = ["lib"]
+  
+  spec.add_development_dependency "bundler", "~> 1.3"
+  spec.add_development_dependency "rake"
+  spec.add_development_dependency "rspec"
+  spec.add_runtime_dependency "parslet"
+ 
+  end
+  

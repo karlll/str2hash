@@ -1,8 +1,6 @@
 require 'parslet'
 
-# Tiny parser for converting strings to hashes
-# karlll <karl@ninjacontrol.com>, 2013-03-23
-
+# @author karl l <karl@ninjacontrol.com>
 class HashParse < Parslet::Parser
 
   rule(:lcbracket) { str('{') >> sp? }
@@ -88,6 +86,7 @@ class HashParse < Parslet::Parser
 
 end
 
+# @author karl l <karl@ninjacontrol.com>
 class HashTransform < Parslet::Transform
 
   rule(:dec_int => simple(:i)) { Integer(i) }
@@ -120,13 +119,26 @@ class HashTransform < Parslet::Transform
 end
 
 
+# Defines String#to_h
+# @author karl l <karl@ninjacontrol.com>
 module Str2Hash
 
+  # @deprecated
   def str_to_hash(str)
 
   end
 
   module String
+
+    #
+    # Converts the string to a hash representation
+    # @return [Hash] Hash representation of the string
+    # @raise [Parslet::ParseFailed] If parsing of the string fails
+    #
+    # @example
+    #  "{ :foo => 'bar'}".to_h
+    #  => {:foo=>"bar"}
+    #
     def to_h
 
       p = HashParse.new
