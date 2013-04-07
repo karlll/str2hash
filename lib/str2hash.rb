@@ -35,8 +35,8 @@ class HashParse < Parslet::Parser
 
   rule(:string) { 
       ( 
-        (str("'") >> match["^'"].repeat(1).as(:str) >> str("'")) |
-        (str('"') >> match['^"'].repeat(1).as(:str) >> str('"'))
+        (str("'") >> match["^'"].repeat.as(:str) >> str("'")) |
+        (str('"') >> match['^"'].repeat.as(:str) >> str('"'))
       ) >> sp?
   }
   
@@ -95,7 +95,17 @@ class HashTransform < Parslet::Transform
 
   rule(:bin_int => simple(:i)) { Integer(i) }
 
-  rule(:str => simple(:s)) { s.to_s }
+  rule(:str => subtree(:s)) {
+                              if s.is_a?(Array)
+                                if s.eql?([]) # empty string
+                                  ""
+                                else
+                                  s
+                                end
+                              else
+                                s.to_s
+                              end
+                           }
 
   rule(:pat => simple(:p)) { /#{p}/ }
 

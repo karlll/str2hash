@@ -25,7 +25,9 @@ PRODS = [
     {s: "{ foo: /foo/ }", h: {:foo => /foo/}},
     {s: "{ foo: true }", h: {:foo => true}},
     {s: "{ :foo => :bar, :foo2 => :bar2}", h: {:foo => :bar, :foo2 => :bar2}},
-    {s: ":foo => :bar, :foo2 => :bar2", h: {:foo => :bar, :foo2 => :bar2}}
+    {s: ":foo => :bar, :foo2 => :bar2", h: {:foo => :bar, :foo2 => :bar2}},
+    {s: "{:foo => ''}", h: {:foo => ''}},
+    {s: "{:foo => \"\"}", h: {:foo => ""}}
 ]
 
 describe HashParse do
